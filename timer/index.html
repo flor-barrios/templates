@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus Timer</title>
+
+<!-- CUSTOMIZE: DEFAULT_MINUTES below is only used the first time, before the user
+     sets their own session length via the ✎ button. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --ring-color:#E28A9A;
+  --ring-track:#F2C6D0;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  position:relative;width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.edit-toggle{
+  position:absolute;top:12px;right:12px;background:#ffffffaa;border:none;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.edit-toggle:disabled{opacity:.4;cursor:default;}
+.title{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+.ring-wrap{position:relative;width:clamp(140px,42vw,190px);height:clamp(140px,42vw,190px);}
+svg{transform:rotate(-90deg);width:100%;height:100%;}
+circle{fill:none;stroke-linecap:round;}
+.track{stroke:var(--ring-track);}
+.progress{stroke:var(--ring-color);transition:stroke-dashoffset .3s linear;}
+.center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+.time{font-family:"DM Serif Display",serif;font-size:clamp(1.6rem,7vw,2.1rem);margin:0;}
+.controls{display:flex;gap:8px;margin-top:6px;}
+button.action{
+  border:none;background:var(--ring-color);color:#fff;padding:8px 18px;border-radius:999px;
+  font-family:"Poppins",sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;
+}
+button.secondary{background:#ffffffaa;color:var(--text);}
+button.action:hover{opacity:.9;}
+
+.edit-panel{display:none;flex-direction:column;gap:8px;background:#ffffffcc;border-radius:12px;padding:14px;width:100%;max-width:200px;}
+.edit-panel.open{display:flex;}
+.field{display:flex;flex-direction:column;gap:3px;text-align:left;}
+.field label{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.field input{
+  border:1px solid #E7B9C4;border-radius:8px;padding:6px 8px;font-family:"Poppins",sans-serif;
+  font-size:.85rem;color:var(--text);
+}
+.save-btn{
+  border:none;background:var(--ring-color);color:#fff;padding:8px;border-radius:999px;
+  font-family:"Poppins",sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;
+}
+.display-view{display:flex;flex-direction:column;align-items:center;gap:10px;}
+</style>
+</head>
+<body>
+<main class="widget">
+  <button class="edit-toggle" id="editToggle" title="Edit session length">✎</button>
+
+  <div class="display-view" id="displayView">
+    <p class="title">DEEP WORK SESSION</p>
+    <div class="ring-wrap">
+      <svg viewBox="0 0 200 200">
+        <circle class="track" cx="100" cy="100" r="85" stroke-width="14"/>
+        <circle class="progress" id="progressCircle" cx="100" cy="100" r="85" stroke-width="14"/>
+      </svg>
+      <div class="center"><p class="time" id="timeDisplay">25:00</p></div>
+    </div>
+    <div class="controls">
+      <button class="action" id="startPauseBtn">Start</button>
+      <button class="action secondary" id="resetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="edit-panel" id="editPanel">
+    <div class="field">
+      <label for="minutesInput">Session length (min)</label>
+      <input type="number" id="minutesInput" min="1" max="180">
+    </div>
+    <button class="save-btn" id="saveBtn">Save</button>
+  </div>
+</main>
+
+<script>
+const KEY = "focusTimerMinutes";
+const DEFAULT_MINUTES = 25;
+
+function loadMinutes(){
+  const v = Number(localStorage.getItem(KEY));
+  return v && v > 0 ? v : DEFAULT_MINUTES;
+}
+function saveMinutes(v){ localStorage.setItem(KEY, String(v)); }
+
+let totalSeconds = loadMinutes() * 60;
+let secondsLeft = totalSeconds;
+let running = false;
+let timer = null;
+
+const circle = document.getElementById("progressCircle");
+const r = 85;
+const circumference = 2 * Math.PI * r;
+circle.style.strokeDasharray = circumference;
+circle.style.strokeDashoffset = 0;
+
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function render(){
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  document.getElementById("timeDisplay").textContent = `${pad(m)}:${pad(s)}`;
+  const progressFraction = 1 - secondsLeft / totalSeconds;
+  circle.style.strokeDashoffset = circumference * progressFraction;
+  document.getElementById("minutesInput").value = totalSeconds / 60;
+}
+
+function tick(){
+  if(secondsLeft <= 0){
+    clearInterval(timer);
+    running = false;
+    document.getElementById("startPauseBtn").textContent = "Start";
+    return;
+  }
+  secondsLeft--;
+  render();
+}
+
+document.getElementById("startPauseBtn").addEventListener("click", (e) => {
+  running = !running;
+  e.target.textContent = running ? "Pause" : "Start";
+  document.getElementById("editToggle").disabled = running;
+  if(running){
+    timer = setInterval(tick, 1000);
+  } else {
+    clearInterval(timer);
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  clearInterval(timer);
+  running = false;
+  secondsLeft = totalSeconds;
+  document.getElementById("startPauseBtn").textContent = "Start";
+  document.getElementById("editToggle").disabled = false;
+  render();
+});
+
+document.getElementById("editToggle").addEventListener("click", (e) => {
+  if(e.target.disabled) return;
+  const panel = document.getElementById("editPanel");
+  const view = document.getElementById("displayView");
+  const opening = !panel.classList.contains("open");
+  panel.classList.toggle("open", opening);
+  view.style.display = opening ? "none" : "flex";
+});
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const minutes = Math.max(1, Math.min(180, Number(document.getElementById("minutesInput").value) || DEFAULT_MINUTES));
+  saveMinutes(minutes);
+  totalSeconds = minutes * 60;
+  secondsLeft = totalSeconds;
+  render();
+  document.getElementById("editPanel").classList.remove("open");
+  document.getElementById("displayView").style.display = "flex";
+});
+
+render();
+</script>
+</body>
+</html>

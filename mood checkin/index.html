@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mood / Energy Check-in</title>
+
+<!-- CUSTOMIZE: edit the MOODS array below to change the options and emojis. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --selected:#E28A9A;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.title{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+.moods{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.mood-btn{
+  border:2px solid transparent;background:#ffffffaa;border-radius:14px;
+  padding:10px 8px;width:70px;cursor:pointer;transition:.2s;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.mood-btn .emoji{font-size:1.5rem;}
+.mood-btn .txt{font-size:.6rem;color:var(--muted);font-weight:600;}
+.mood-btn.selected{border-color:var(--selected);background:#fff;}
+.result{font-family:"DM Serif Display",serif;font-size:clamp(1rem,4.5vw,1.3rem);min-height:1.6em;}
+</style>
+</head>
+<body>
+<main class="widget">
+  <p class="title">TODAY'S CREATIVE ENERGY</p>
+  <div class="moods" id="moods"></div>
+  <p class="result" id="result"></p>
+</main>
+
+<script>
+// CUSTOMIZE: change labels/emojis freely
+const MOODS = [
+  { emoji:"✨", label:"Inspired" },
+  { emoji:"🔥", label:"Creative" },
+  { emoji:"😌", label:"Chill" },
+  { emoji:"😴", label:"Tired" },
+  { emoji:"🫠", label:"Burnt out" }
+];
+
+const KEY = "moodCheckin";
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+function loadData(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }
+  catch(e){ return {}; }
+}
+function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+const container = document.getElementById("moods");
+const resultEl = document.getElementById("result");
+
+MOODS.forEach((m, i) => {
+  const btn = document.createElement("button");
+  btn.className = "mood-btn";
+  btn.dataset.index = i;
+  btn.innerHTML = `<span class="emoji">${m.emoji}</span><span class="txt">${m.label}</span>`;
+  btn.addEventListener("click", () => selectMood(i));
+  container.appendChild(btn);
+});
+
+function selectMood(i){
+  const data = loadData();
+  data[todayStr()] = i;
+  saveData(data);
+  render();
+}
+
+function render(){
+  const data = loadData();
+  const todayIndex = data[todayStr()];
+  document.querySelectorAll(".mood-btn").forEach(btn => {
+    btn.classList.toggle("selected", Number(btn.dataset.index) === todayIndex);
+  });
+  resultEl.textContent = todayIndex !== undefined
+    ? `Feeling ${MOODS[todayIndex].label.toLowerCase()} today`
+    : "";
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cozy Digital Clock</title>
+
+  <!-- CUSTOMIZE: Change --bg for the background color, the Google Font below for typography,
+       and --time-size for the clock size. Everything else is responsive automatically. -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #F7D9DF;
+      --text: #5F4650;
+      --muted: #8A6872;
+      --time-size: clamp(3.2rem, 13vw, 5.8rem);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-height: 100%;
+      overflow: hidden;
+      background: transparent;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .clock-widget {
+      width: 100%;
+      min-height: 100vh;
+      padding: clamp(18px, 6vw, 30px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(95, 70, 80, 0.10);
+      text-align: center;
+    }
+
+    .clock-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(3px, 1vw, 7px);
+    }
+
+    .time-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: clamp(8px, 2vw, 14px);
+      line-height: 0.95;
+    }
+
+    .time {
+      margin: 0;
+      font-family: "DM Serif Display", serif;
+      font-size: var(--time-size);
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      white-space: nowrap;
+    }
+
+    .ampm {
+      margin: 0;
+      font-size: clamp(0.62rem, 2.5vw, 0.82rem);
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .day {
+      margin: clamp(7px, 2vw, 12px) 0 0;
+      font-size: clamp(0.62rem, 2.6vw, 0.78rem);
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding-left: 0.28em;
+    }
+
+    @media (max-width: 320px) {
+      .clock-widget {
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .time-row {
+        gap: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="clock-widget" aria-label="Current local time">
+    <div class="clock-content">
+      <div class="time-row">
+        <p class="time" id="time">12:00</p>
+        <p class="ampm" id="ampm">AM</p>
+      </div>
+      <p class="day" id="day">MONDAY</p>
+    </div>
+  </main>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+
+      const day = new Intl.DateTimeFormat("en-US", {
+        weekday: "long"
+      }).format(now);
+
+      document.getElementById("time").textContent =
+        `${String(hours).padStart(2, "0")}:${minutes}`;
+
+      document.getElementById("ampm").textContent = ampm;
+      document.getElementById("day").textContent = day.toUpperCase();
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Streak Tracker</title>
+
+<!-- CUSTOMIZE: --bg for background color, --accent for the flame/streak color.
+     Streak persists per-browser using localStorage (key: "streakData"). -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --accent:#E28A9A;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.flame{font-size:clamp(2.4rem,10vw,3.4rem);transition:transform .3s ease;}
+.count{font-family:"DM Serif Display",serif;font-size:clamp(2.6rem,11vw,3.6rem);margin:0;line-height:1;}
+.label{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+button{
+  margin-top:6px;border:none;background:var(--accent);color:#fff;
+  padding:10px 22px;border-radius:999px;font-family:"Poppins",sans-serif;
+  font-size:.85rem;font-weight:600;cursor:pointer;transition:opacity .2s;
+}
+button:disabled{opacity:.5;cursor:default;}
+button:not(:disabled):hover{opacity:.88;}
+</style>
+</head>
+<body>
+<main class="widget">
+  <div class="flame" id="flame">🔥</div>
+  <p class="count" id="count">0</p>
+  <p class="label">DAY STREAK</p>
+  <button id="markBtn">Mark today done</button>
+</main>
+
+<script>
+const KEY = "streakData";
+
+function loadData(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || { streak: 0, lastDate: null }; }
+  catch(e){ return { streak: 0, lastDate: null }; }
+}
+function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function yesterdayStr(){
+  const d = new Date(); d.setDate(d.getDate()-1);
+  return d.toISOString().slice(0,10);
+}
+
+function render(){
+  const data = loadData();
+  document.getElementById("count").textContent = data.streak;
+  const btn = document.getElementById("markBtn");
+  const flame = document.getElementById("flame");
+
+  if(data.lastDate === todayStr()){
+    btn.disabled = true;
+    btn.textContent = "Done for today ✓";
+  } else {
+    btn.disabled = false;
+    btn.textContent = "Mark today done";
+  }
+
+  const scale = Math.min(1 + data.streak * 0.03, 1.6);
+  flame.style.transform = `scale(${scale})`;
+}
+
+document.getElementById("markBtn").addEventListener("click", () => {
+  const data = loadData();
+  if(data.lastDate === todayStr()) return;
+
+  if(data.lastDate === yesterdayStr()){
+    data.streak += 1;
+  } else {
+    data.streak = 1;
+  }
+  data.lastDate = todayStr();
+  saveData(data);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

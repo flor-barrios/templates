@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goal Progress Bars</title>
+
+<!-- CUSTOMIZE: DEFAULT_GOALS below is only used the first time, before the user
+     edits their own labels/percentages via the ✎ button. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --bar-track:#F2C6D0;
+  --bar-fill:#E28A9A;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  position:relative;width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;justify-content:center;gap:16px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);
+}
+.edit-toggle{
+  position:absolute;top:12px;right:12px;background:#ffffffaa;border:none;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.title{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 4px;text-align:center;}
+.goal{display:flex;flex-direction:column;gap:5px;}
+.goal-top{display:flex;justify-content:space-between;font-size:.78rem;}
+.goal-top .lbl{font-weight:600;}
+.goal-top .pct{color:var(--muted);}
+.bar-track{width:100%;height:9px;background:var(--bar-track);border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--bar-fill);border-radius:999px;width:0%;transition:width 1s ease;}
+
+.edit-panel{display:none;flex-direction:column;gap:10px;background:#ffffffcc;border-radius:12px;padding:14px;}
+.edit-panel.open{display:flex;}
+.edit-row{display:flex;gap:6px;align-items:center;}
+.edit-row input[type="text"]{
+  flex:1;border:1px solid #E7B9C4;border-radius:8px;padding:6px 8px;
+  font-family:"Poppins",sans-serif;font-size:.78rem;color:var(--text);min-width:0;
+}
+.edit-row input[type="number"]{
+  width:56px;border:1px solid #E7B9C4;border-radius:8px;padding:6px 6px;
+  font-family:"Poppins",sans-serif;font-size:.78rem;color:var(--text);
+}
+.save-btn{
+  border:none;background:var(--bar-fill);color:#fff;padding:8px;border-radius:999px;
+  font-family:"Poppins",sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;
+}
+</style>
+</head>
+<body>
+<main class="widget">
+  <button class="edit-toggle" id="editToggle" title="Edit goals">✎</button>
+
+  <div id="displayView">
+    <p class="title">MY GOALS</p>
+    <div id="goalsList"></div>
+  </div>
+
+  <div class="edit-panel" id="editPanel">
+    <div id="editRows"></div>
+    <button class="save-btn" id="saveBtn">Save</button>
+  </div>
+</main>
+
+<script>
+const KEY = "goalBarsData";
+const DEFAULT_GOALS = [
+  { label: "Brand deals this quarter", percent: 60 },
+  { label: "Posting consistency", percent: 85 },
+  { label: "Personal savings goal", percent: 40 }
+];
+
+function loadData(){
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if(Array.isArray(d) && d.length) return d;
+  }catch(e){}
+  return DEFAULT_GOALS;
+}
+function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+function renderDisplay(goals){
+  const list = document.getElementById("goalsList");
+  list.innerHTML = "";
+  goals.forEach(g => {
+    const wrap = document.createElement("div");
+    wrap.className = "goal";
+    wrap.innerHTML = `
+      <div class="goal-top">
+        <span class="lbl">${g.label}</span>
+        <span class="pct">${g.percent}%</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%" data-target="${g.percent}"></div></div>
+    `;
+    list.appendChild(wrap);
+  });
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".bar-fill").forEach(el => {
+      el.style.width = el.dataset.target + "%";
+    });
+  });
+}
+
+function renderEditRows(goals){
+  const rows = document.getElementById("editRows");
+  rows.innerHTML = "";
+  goals.forEach((g, i) => {
+    const row = document.createElement("div");
+    row.className = "edit-row";
+    row.innerHTML = `
+      <input type="text" data-idx="${i}" data-field="label" value="${g.label}">
+      <input type="number" data-idx="${i}" data-field="percent" min="0" max="100" value="${g.percent}">
+    `;
+    rows.appendChild(row);
+  });
+}
+
+function render(){
+  const goals = loadData();
+  renderDisplay(goals);
+  renderEditRows(goals);
+}
+
+document.getElementById("editToggle").addEventListener("click", () => {
+  const panel = document.getElementById("editPanel");
+  const view = document.getElementById("displayView");
+  const opening = !panel.classList.contains("open");
+  panel.classList.toggle("open", opening);
+  view.style.display = opening ? "none" : "block";
+});
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const goals = loadData().map((g, i) => {
+    const labelInput = document.querySelector(`input[data-idx="${i}"][data-field="label"]`);
+    const pctInput = document.querySelector(`input[data-idx="${i}"][data-field="percent"]`);
+    return {
+      label: labelInput ? labelInput.value : g.label,
+      percent: pctInput ? Math.max(0, Math.min(100, Number(pctInput.value) || 0)) : g.percent
+    };
+  });
+  saveData(goals);
+  render();
+  document.getElementById("editPanel").classList.remove("open");
+  document.getElementById("displayView").style.display = "block";
+});
+
+render();
+</script>
+</body>
+</html>

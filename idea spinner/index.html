@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Idea Spinner</title>
+
+<!-- CUSTOMIZE: edit the IDEAS array below with your own content formats/prompts. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --accent:#E28A9A;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.title{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+.card{
+  background:#fff;border-radius:14px;padding:16px 20px;min-width:70%;min-height:64px;
+  display:flex;align-items:center;justify-content:center;
+}
+.idea{font-family:"DM Serif Display",serif;font-size:clamp(1rem,4.8vw,1.3rem);margin:0;}
+button{
+  border:none;background:var(--accent);color:#fff;padding:10px 24px;border-radius:999px;
+  font-family:"Poppins",sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;
+}
+button:hover{opacity:.9;}
+</style>
+</head>
+<body>
+<main class="widget">
+  <p class="title">CONTENT IDEA SPIN</p>
+  <div class="card"><p class="idea" id="idea">Tap spin to get an idea</p></div>
+  <button id="spinBtn">Spin ✨</button>
+</main>
+
+<script>
+// CUSTOMIZE: add/remove as many ideas as you'd like
+const IDEAS = [
+  "Behind-the-scenes of your process",
+  "Day in the life reel",
+  "3 things you learned this week",
+  "Before & after transformation",
+  "Answer a followed FAQ",
+  "Get ready with me + talk through your day",
+  "React to a trend in your niche",
+  "Share a mistake you made and what it taught you",
+  "Carousel: 5 tips in your niche",
+  "Story poll or Q&A",
+  "Product/tool you can't live without",
+  "Unpopular opinion in your niche"
+];
+
+const ideaEl = document.getElementById("idea");
+const btn = document.getElementById("spinBtn");
+let spinning = false;
+
+btn.addEventListener("click", () => {
+  if (spinning) return;
+  spinning = true;
+  btn.disabled = true;
+
+  let ticks = 0;
+  const maxTicks = 16;
+  const interval = setInterval(() => {
+    ideaEl.textContent = IDEAS[Math.floor(Math.random() * IDEAS.length)];
+    ticks++;
+    if (ticks >= maxTicks) {
+      clearInterval(interval);
+      ideaEl.textContent = IDEAS[Math.floor(Math.random() * IDEAS.length)];
+      spinning = false;
+      btn.disabled = false;
+    }
+  }, 80);
+});
+</script>
+</body>
+</html>

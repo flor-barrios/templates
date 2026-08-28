@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Income Snapshot</title>
+
+<!-- CUSTOMIZE: DEFAULT_INCOME/DEFAULT_EXPENSES are only used the first time,
+     before the user edits their own numbers via the ✎ button. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --bar-track:#F2C6D0;
+  --bar-fill:#E28A9A;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  position:relative;width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;justify-content:center;gap:14px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);
+}
+.edit-toggle{
+  position:absolute;top:12px;right:12px;background:#ffffffaa;border:none;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.title{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;text-align:center;}
+.net{font-family:"DM Serif Display",serif;font-size:clamp(1.8rem,8vw,2.4rem);margin:0;text-align:center;}
+.bar-track{width:100%;height:10px;background:var(--bar-track);border-radius:999px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--bar-fill);border-radius:999px;transition:width 1s ease;width:0%;}
+.rows{display:flex;justify-content:space-between;font-size:.78rem;}
+.rows .lbl{color:var(--muted);}
+.rows .val{font-weight:600;}
+
+.edit-panel{display:none;flex-direction:column;gap:8px;background:#ffffffcc;border-radius:12px;padding:14px;}
+.edit-panel.open{display:flex;}
+.field{display:flex;flex-direction:column;gap:3px;text-align:left;}
+.field label{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;}
+.field input{
+  border:1px solid #E7B9C4;border-radius:8px;padding:6px 8px;font-family:"Poppins",sans-serif;
+  font-size:.85rem;color:var(--text);
+}
+.save-btn{
+  border:none;background:var(--bar-fill);color:#fff;padding:8px;border-radius:999px;
+  font-family:"Poppins",sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;
+}
+</style>
+</head>
+<body>
+<main class="widget">
+  <button class="edit-toggle" id="editToggle" title="Edit values">✎</button>
+
+  <div id="displayView">
+    <p class="title">THIS MONTH</p>
+    <p class="net" id="net">$0</p>
+    <div class="bar-track"><div class="bar-fill" id="fill"></div></div>
+    <div class="rows"><span class="lbl">Income</span><span class="val" id="incomeVal"></span></div>
+    <div class="rows"><span class="lbl">Expenses</span><span class="val" id="expensesVal"></span></div>
+  </div>
+
+  <div class="edit-panel" id="editPanel">
+    <div class="field">
+      <label for="incomeInput">Income ($)</label>
+      <input type="number" id="incomeInput" min="0">
+    </div>
+    <div class="field">
+      <label for="expensesInput">Expenses ($)</label>
+      <input type="number" id="expensesInput" min="0">
+    </div>
+    <button class="save-btn" id="saveBtn">Save</button>
+  </div>
+</main>
+
+<script>
+const KEY = "incomeSnapshotData";
+const DEFAULT_INCOME = 3200;
+const DEFAULT_EXPENSES = 850;
+
+function loadData(){
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if(d && typeof d.income === "number" && typeof d.expenses === "number") return d;
+  }catch(e){}
+  return { income: DEFAULT_INCOME, expenses: DEFAULT_EXPENSES };
+}
+function saveData(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+const fmt = n => "$" + n.toLocaleString();
+
+function render(){
+  const { income, expenses } = loadData();
+  const net = income - expenses;
+  const pctSpent = income > 0 ? Math.min((expenses / income) * 100, 100) : 0;
+
+  document.getElementById("net").textContent = fmt(net) + " net";
+  document.getElementById("incomeVal").textContent = fmt(income);
+  document.getElementById("expensesVal").textContent = fmt(expenses);
+  document.getElementById("fill").style.width = "0%";
+  requestAnimationFrame(() => {
+    document.getElementById("fill").style.width = pctSpent + "%";
+  });
+
+  document.getElementById("incomeInput").value = income;
+  document.getElementById("expensesInput").value = expenses;
+}
+
+document.getElementById("editToggle").addEventListener("click", () => {
+  const panel = document.getElementById("editPanel");
+  const view = document.getElementById("displayView");
+  const opening = !panel.classList.contains("open");
+  panel.classList.toggle("open", opening);
+  view.style.display = opening ? "none" : "flex";
+});
+
+document.getElementById("saveBtn").addEventListener("click", () => {
+  const income = Number(document.getElementById("incomeInput").value) || 0;
+  const expenses = Number(document.getElementById("expensesInput").value) || 0;
+  saveData({ income, expenses });
+  render();
+  document.getElementById("editPanel").classList.remove("open");
+  document.getElementById("displayView").style.display = "flex";
+});
+
+render();
+</script>
+</body>
+</html>

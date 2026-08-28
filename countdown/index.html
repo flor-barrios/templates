@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countdown to Launch</title>
+
+<!-- CUSTOMIZE: set TARGET_DATE below in the script (ISO format), and LABEL text. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --card:#ffffffaa;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.title{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+.units{display:flex;gap:clamp(8px,3vw,14px);}
+.unit{
+  background:var(--card);border-radius:12px;padding:clamp(10px,3vw,16px) clamp(10px,3.5vw,18px);
+  display:flex;flex-direction:column;align-items:center;min-width:56px;
+}
+.num{font-family:"DM Serif Display",serif;font-size:clamp(1.4rem,6vw,2rem);margin:0;line-height:1;}
+.unit-label{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.done{font-family:"DM Serif Display",serif;font-size:clamp(1.6rem,7vw,2.2rem);}
+</style>
+</head>
+<body>
+<main class="widget">
+  <p class="title" id="launchLabel">DAYS UNTIL LAUNCH</p>
+  <div class="units" id="units">
+    <div class="unit"><p class="num" id="d">00</p><span class="unit-label">days</span></div>
+    <div class="unit"><p class="num" id="h">00</p><span class="unit-label">hrs</span></div>
+    <div class="unit"><p class="num" id="m">00</p><span class="unit-label">min</span></div>
+    <div class="unit"><p class="num" id="s">00</p><span class="unit-label">sec</span></div>
+  </div>
+</main>
+
+<script>
+// CUSTOMIZE: your target launch date/time
+const TARGET_DATE = new Date("2026-12-01T00:00:00");
+const LABEL = "DAYS UNTIL LAUNCH";
+
+document.getElementById("launchLabel").textContent = LABEL;
+
+function pad(n){ return String(n).padStart(2,"0"); }
+
+function tick(){
+  const now = new Date();
+  let diff = TARGET_DATE - now;
+
+  if(diff <= 0){
+    document.getElementById("units").outerHTML = '<p class="done">It\'s launch day! 🎉</p>';
+    clearInterval(timer);
+    return;
+  }
+
+  const days = Math.floor(diff / (1000*60*60*24));
+  diff -= days * (1000*60*60*24);
+  const hours = Math.floor(diff / (1000*60*60));
+  diff -= hours * (1000*60*60);
+  const mins = Math.floor(diff / (1000*60));
+  diff -= mins * (1000*60);
+  const secs = Math.floor(diff / 1000);
+
+  document.getElementById("d").textContent = pad(days);
+  document.getElementById("h").textContent = pad(hours);
+  document.getElementById("m").textContent = pad(mins);
+  document.getElementById("s").textContent = pad(secs);
+}
+
+tick();
+const timer = setInterval(tick, 1000);
+</script>
+</body>
+</html>

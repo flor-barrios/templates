@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Affirmation</title>
+
+<!-- CUSTOMIZE: edit the AFFIRMATIONS array below with your own lines. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  width:100%;min-height:100vh;padding:clamp(20px,7vw,32px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--bg);color:var(--text);border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+}
+.title{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
+.quote{
+  font-family:"DM Serif Display",serif;font-style:italic;
+  font-size:clamp(1.1rem,5.5vw,1.5rem);line-height:1.35;margin:0;max-width:26ch;
+}
+</style>
+</head>
+<body>
+<main class="widget">
+  <p class="title">TODAY'S MANTRA</p>
+  <p class="quote" id="quote">"..."</p>
+</main>
+
+<script>
+// CUSTOMIZE: add/remove as many lines as you want
+const AFFIRMATIONS = [
+  "I create with confidence, not comparison.",
+  "My work is allowed to evolve.",
+  "I am building something real, one post at a time.",
+  "Consistency is my superpower.",
+  "I attract the audience meant for me.",
+  "Rest is part of the process.",
+  "I show up as myself, and that's enough.",
+  "Growth isn't linear, and neither am I.",
+  "I trust my timing.",
+  "This is my era."
+];
+
+function dayOfYear(date){
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date - start;
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+const index = dayOfYear(new Date()) % AFFIRMATIONS.length;
+document.getElementById("quote").textContent = `"${AFFIRMATIONS[index]}"`;
+</script>
+</body>
+</html>

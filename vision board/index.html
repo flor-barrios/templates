@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision Board Rotator</title>
+
+<!-- CUSTOMIZE: replace the URLs in IMAGES below with your own hosted images
+     (e.g. upload to the same GitHub repo and link to the raw file, or use imgur/postimg).
+     Also edit QUOTES to match your own vision board captions. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --text:#fff;
+}
+*{box-sizing:border-box;}
+html,body{width:100%;height:100%;margin:0;}
+body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+.widget{
+  position:relative;width:100%;min-height:100vh;border-radius:18px;overflow:hidden;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);
+}
+.slide{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0;transition:opacity 1.2s ease;
+}
+.slide.active{opacity:1;}
+.overlay{
+  position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.55) 100%);
+  display:flex;align-items:flex-end;justify-content:center;padding:20px;
+}
+.quote{
+  color:var(--text);font-family:"DM Serif Display",serif;font-style:italic;
+  font-size:clamp(1rem,5vw,1.35rem);text-align:center;margin:0;max-width:90%;
+  text-shadow:0 2px 8px rgba(0,0,0,0.35);
+}
+</style>
+</head>
+<body>
+<main class="widget" id="widget">
+  <div class="overlay"><p class="quote" id="quote">"..."</p></div>
+</main>
+
+<script>
+// CUSTOMIZE: swap in your own image URLs (same length as QUOTES, or leave mismatched — it will loop)
+const IMAGES = [
+  "https://picsum.photos/id/1011/800/1000",
+  "https://picsum.photos/id/1025/800/1000",
+  "https://picsum.photos/id/1035/800/1000",
+  "https://picsum.photos/id/1043/800/1000"
+];
+
+const QUOTES = [
+  "I am in my glow up era.",
+  "Soft life, hard goals.",
+  "Building the life I dream about.",
+  "Consistency over perfection."
+];
+
+const widget = document.getElementById("widget");
+const quoteEl = document.getElementById("quote");
+
+IMAGES.forEach((url, i) => {
+  const slide = document.createElement("div");
+  slide.className = "slide" + (i === 0 ? " active" : "");
+  slide.style.backgroundImage = `url(${url})`;
+  slide.dataset.index = i;
+  widget.insertBefore(slide, widget.firstChild);
+});
+
+let current = 0;
+const slides = document.querySelectorAll(".slide");
+quoteEl.textContent = `"${QUOTES[0] || ""}"`;
+
+setInterval(() => {
+  slides[current].classList.remove("active");
+  current = (current + 1) % slides.length;
+  slides[current].classList.add("active");
+  quoteEl.textContent = `"${QUOTES[current % QUOTES.length] || ""}"`;
+}, 4000);
+</script>
+</body>
+</html>
