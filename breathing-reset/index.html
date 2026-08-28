@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Breathing Reset</title>
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--text:#20201f;--muted:#777773;--line:#e7e7e3;--soft:#efefec;--accent:#20201f}
+*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}
+body{background:transparent;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+.widget{width:100%;min-height:100vh;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:14px;overflow:hidden}
+.center{text-align:center;align-items:center}.kicker{margin:0;color:var(--muted);font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.big{margin:0;font-size:clamp(2rem,10vw,4rem);line-height:1;font-weight:650;letter-spacing:-.04em}.sub{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
+.track{width:100%;height:9px;background:var(--soft);border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .35s ease}
+.primary{border:none;background:var(--accent);color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:inherit;font-weight:600}.primary:disabled{opacity:.55;cursor:default}
+.card{width:120px;height:120px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;transition:transform 4s ease}.value{font-weight:650}
+@media(prefers-color-scheme:dark){:root{--bg:#191919;--card:#222;--text:#f3f3f2;--muted:#9b9b97;--line:#343432;--soft:#2d2d2a;--accent:#f3f3f2}.primary{color:#191919}}
+</style>
+</head>
+<body>
+<main class="widget center">
+<p class="kicker">60 SECOND RESET</p>
+<div class="card" id="circle"><span class="value" id="phase">Ready</span></div>
+<button class="primary" id="start">Start</button>
+<p class="sub">4 sec inhale · 4 sec exhale</p>
+</main>
+<script>
+let running=false,timer=null;
+const circle=document.getElementById('circle');
+const phase=document.getElementById('phase');
+const start=document.getElementById('start');
+
+start.addEventListener('click',()=>{
+  if(running) return;
+  running=true; start.disabled=true;
+  let inhale=true,steps=0;
+
+  function nextStep(){
+    phase.textContent=inhale?'Inhale':'Exhale';
+    circle.style.transform=inhale?'scale(1.25)':'scale(.85)';
+    inhale=!inhale; steps++;
+    if(steps>=15){
+      clearInterval(timer);
+      setTimeout(()=>{
+        phase.textContent='Done';
+        circle.style.transform='scale(1)';
+        running=false;
+        start.disabled=false;
+      },4000);
+    }
+  }
+
+  nextStep();
+  timer=setInterval(nextStep,4000);
+});
+</script>
+</body>
+</html>
