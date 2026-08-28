@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Countdown to Launch</title>
-
-<!-- CUSTOMIZE: set TARGET_DATE below in the script (ISO format), and LABEL text. -->
+<title>Countdown</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,73 +15,545 @@
   --text:#5F4650;
   --muted:#8A6872;
   --card:#ffffffaa;
+  --accent:#E28A9A;
 }
-*{box-sizing:border-box;}
-html,body{width:100%;height:100%;margin:0;}
-body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+
+body{
+  min-height:100%;
+  overflow:hidden;
+  background:transparent;
+  font-family:"Poppins",sans-serif;
+}
+
 .widget{
-  width:100%;min-height:100vh;padding:clamp(18px,6vw,28px);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-  background:var(--bg);color:var(--text);border-radius:18px;
-  box-shadow:0 8px 28px rgba(95,70,80,0.10);text-align:center;
+  position:relative;
+  width:100%;
+  min-height:100vh;
+  padding:clamp(18px,6vw,28px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  background:var(--bg);
+  color:var(--text);
+  border-radius:18px;
+  box-shadow:0 8px 28px rgba(95,70,80,0.10);
+  text-align:center;
 }
-.title{font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0;}
-.units{display:flex;gap:clamp(8px,3vw,14px);}
+
+.edit-toggle{
+  position:absolute;
+  top:12px;
+  right:12px;
+  background:#ffffffaa;
+  border:none;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:.8rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--text);
+}
+
+.title{
+  font-size:.7rem;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+  margin:0;
+}
+
+.units{
+  display:flex;
+  gap:clamp(8px,3vw,14px);
+}
+
 .unit{
-  background:var(--card);border-radius:12px;padding:clamp(10px,3vw,16px) clamp(10px,3.5vw,18px);
-  display:flex;flex-direction:column;align-items:center;min-width:56px;
+  background:var(--card);
+  border-radius:12px;
+  padding:clamp(10px,3vw,16px) clamp(10px,3.5vw,18px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-width:56px;
 }
-.num{font-family:"DM Serif Display",serif;font-size:clamp(1.4rem,6vw,2rem);margin:0;line-height:1;}
-.unit-label{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
-.done{font-family:"DM Serif Display",serif;font-size:clamp(1.6rem,7vw,2.2rem);}
+
+.num{
+  font-family:"DM Serif Display",serif;
+  font-size:clamp(1.4rem,6vw,2rem);
+  margin:0;
+  line-height:1;
+}
+
+.unit-label{
+  font-size:.6rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.done{
+  font-family:"DM Serif Display",serif;
+  font-size:clamp(1.6rem,7vw,2.2rem);
+  margin:0;
+}
+
+.edit-panel{
+  display:none;
+  width:100%;
+  flex-direction:column;
+  gap:10px;
+  background:#ffffffcc;
+  border-radius:12px;
+  padding:14px;
+}
+
+.edit-panel.open{
+  display:flex;
+}
+
+.fields{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  text-align:left;
+}
+
+.field label{
+  font-size:.58rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+.field input{
+  width:100%;
+  border:1px solid #E7B9C4;
+  border-radius:8px;
+  padding:7px 8px;
+  font-family:"Poppins",sans-serif;
+  font-size:.85rem;
+  color:var(--text);
+  background:white;
+}
+
+.label-input{
+  width:100%;
+}
+
+.save-btn{
+  border:none;
+  background:var(--accent);
+  color:white;
+  padding:8px;
+  border-radius:999px;
+  font-family:"Poppins",sans-serif;
+  font-size:.78rem;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.display-view{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
 </style>
 </head>
+
 <body>
+
 <main class="widget">
-  <p class="title" id="launchLabel">DAYS UNTIL LAUNCH</p>
-  <div class="units" id="units">
-    <div class="unit"><p class="num" id="d">00</p><span class="unit-label">days</span></div>
-    <div class="unit"><p class="num" id="h">00</p><span class="unit-label">hrs</span></div>
-    <div class="unit"><p class="num" id="m">00</p><span class="unit-label">min</span></div>
-    <div class="unit"><p class="num" id="s">00</p><span class="unit-label">sec</span></div>
+
+  <button class="edit-toggle" id="editToggle" title="Edit countdown">✎</button>
+
+  <div class="display-view" id="displayView">
+
+    <p class="title" id="countdownLabel">COUNTDOWN</p>
+
+    <div class="units" id="units">
+      <div class="unit">
+        <p class="num" id="d">00</p>
+        <span class="unit-label">days</span>
+      </div>
+
+      <div class="unit">
+        <p class="num" id="h">00</p>
+        <span class="unit-label">hrs</span>
+      </div>
+
+      <div class="unit">
+        <p class="num" id="m">00</p>
+        <span class="unit-label">min</span>
+      </div>
+
+      <div class="unit">
+        <p class="num" id="s">00</p>
+        <span class="unit-label">sec</span>
+      </div>
+    </div>
+
+    <p class="done" id="doneMessage" style="display:none;">
+      Time's up! 🎉
+    </p>
+
   </div>
+
+
+  <div class="edit-panel" id="editPanel">
+
+    <div class="field">
+      <label>Countdown title</label>
+      <input
+        class="label-input"
+        type="text"
+        id="labelInput"
+        placeholder="COUNTDOWN"
+      >
+    </div>
+
+    <div class="fields">
+
+      <div class="field">
+        <label>Days</label>
+        <input type="number" id="daysInput" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <label>Hours</label>
+        <input type="number" id="hoursInput" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <label>Minutes</label>
+        <input type="number" id="minutesInput" min="0" value="0">
+      </div>
+
+      <div class="field">
+        <label>Seconds</label>
+        <input type="number" id="secondsInput" min="0" value="0">
+      </div>
+
+    </div>
+
+    <button class="save-btn" id="saveBtn">
+      Start countdown
+    </button>
+
+  </div>
+
 </main>
 
+
 <script>
-// CUSTOMIZE: your target launch date/time
-const TARGET_DATE = new Date("2026-12-01T00:00:00");
-const LABEL = "DAYS UNTIL LAUNCH";
 
-document.getElementById("launchLabel").textContent = LABEL;
+const STORAGE_KEY = "editableCountdown";
 
-function pad(n){ return String(n).padStart(2,"0"); }
+let timer = null;
 
-function tick(){
-  const now = new Date();
-  let diff = TARGET_DATE - now;
-
-  if(diff <= 0){
-    document.getElementById("units").outerHTML = '<p class="done">It\'s launch day! 🎉</p>';
-    clearInterval(timer);
-    return;
-  }
-
-  const days = Math.floor(diff / (1000*60*60*24));
-  diff -= days * (1000*60*60*24);
-  const hours = Math.floor(diff / (1000*60*60));
-  diff -= hours * (1000*60*60);
-  const mins = Math.floor(diff / (1000*60));
-  diff -= mins * (1000*60);
-  const secs = Math.floor(diff / 1000);
-
-  document.getElementById("d").textContent = pad(days);
-  document.getElementById("h").textContent = pad(hours);
-  document.getElementById("m").textContent = pad(mins);
-  document.getElementById("s").textContent = pad(secs);
+function pad(n){
+  return String(n).padStart(2,"0");
 }
 
-tick();
-const timer = setInterval(tick, 1000);
+
+function getSavedData(){
+
+  try{
+
+    const data = JSON.parse(
+      localStorage.getItem(STORAGE_KEY)
+    );
+
+    if(data){
+      return data;
+    }
+
+  }catch(e){}
+
+  return null;
+}
+
+
+function saveData(data){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(data)
+  );
+
+}
+
+
+function showTime(ms){
+
+  if(ms <= 0){
+
+    document.getElementById("units").style.display = "none";
+    document.getElementById("doneMessage").style.display = "block";
+
+    return;
+
+  }
+
+  document.getElementById("units").style.display = "flex";
+  document.getElementById("doneMessage").style.display = "none";
+
+
+  const totalSeconds = Math.floor(ms / 1000);
+
+  const days = Math.floor(
+    totalSeconds / 86400
+  );
+
+  const hours = Math.floor(
+    (totalSeconds % 86400) / 3600
+  );
+
+  const minutes = Math.floor(
+    (totalSeconds % 3600) / 60
+  );
+
+  const seconds =
+    totalSeconds % 60;
+
+
+  document.getElementById("d").textContent =
+    pad(days);
+
+  document.getElementById("h").textContent =
+    pad(hours);
+
+  document.getElementById("m").textContent =
+    pad(minutes);
+
+  document.getElementById("s").textContent =
+    pad(seconds);
+
+}
+
+
+function startTimer(){
+
+  clearInterval(timer);
+
+  const data = getSavedData();
+
+  if(!data){
+
+    showTime(0);
+    return;
+
+  }
+
+  document.getElementById("countdownLabel").textContent =
+    data.label || "COUNTDOWN";
+
+
+  function update(){
+
+    const remaining =
+      data.endTime - Date.now();
+
+    if(remaining <= 0){
+
+      showTime(0);
+
+      clearInterval(timer);
+
+      return;
+
+    }
+
+    showTime(remaining);
+
+  }
+
+
+  update();
+
+  timer = setInterval(
+    update,
+    1000
+  );
+
+}
+
+
+document
+.getElementById("editToggle")
+.addEventListener("click", () => {
+
+  const panel =
+    document.getElementById("editPanel");
+
+  const view =
+    document.getElementById("displayView");
+
+  const opening =
+    !panel.classList.contains("open");
+
+
+  panel.classList.toggle(
+    "open",
+    opening
+  );
+
+  view.style.display =
+    opening ? "none" : "flex";
+
+
+  if(opening){
+
+    const data = getSavedData();
+
+    document.getElementById("labelInput").value =
+      data?.label || "COUNTDOWN";
+
+  }
+
+});
+
+
+document
+.getElementById("saveBtn")
+.addEventListener("click", () => {
+
+  const days =
+    Math.max(
+      0,
+      Number(
+        document.getElementById("daysInput").value
+      ) || 0
+    );
+
+  const hours =
+    Math.max(
+      0,
+      Number(
+        document.getElementById("hoursInput").value
+      ) || 0
+    );
+
+  const minutes =
+    Math.max(
+      0,
+      Number(
+        document.getElementById("minutesInput").value
+      ) || 0
+    );
+
+  const seconds =
+    Math.max(
+      0,
+      Number(
+        document.getElementById("secondsInput").value
+      ) || 0
+    );
+
+
+  const totalMilliseconds =
+    (
+      days * 86400 +
+      hours * 3600 +
+      minutes * 60 +
+      seconds
+    ) * 1000;
+
+
+  const label =
+    document
+    .getElementById("labelInput")
+    .value
+    .trim() || "COUNTDOWN";
+
+
+  const data = {
+
+    label: label,
+
+    endTime:
+      Date.now() +
+      totalMilliseconds
+
+  };
+
+
+  saveData(data);
+
+
+  document
+  .getElementById("editPanel")
+  .classList.remove("open");
+
+
+  document
+  .getElementById("displayView")
+  .style.display = "flex";
+
+
+  startTimer();
+
+});
+
+
+const saved =
+  getSavedData();
+
+if(saved){
+
+  document
+  .getElementById("countdownLabel")
+  .textContent =
+  saved.label || "COUNTDOWN";
+
+  startTimer();
+
+}else{
+
+  document
+  .getElementById("d")
+  .textContent = "00";
+
+  document
+  .getElementById("h")
+  .textContent = "00";
+
+  document
+  .getElementById("m")
+  .textContent = "00";
+
+  document
+  .getElementById("s")
+  .textContent = "00";
+
+}
+
 </script>
+
 </body>
 </html>
