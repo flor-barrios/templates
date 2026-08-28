@@ -3,85 +3,1268 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vision Board Rotator</title>
 
-<!-- CUSTOMIZE: replace the URLs in IMAGES below with your own hosted images
-     (e.g. upload to the same GitHub repo and link to the raw file, or use imgur/postimg).
-     Also edit QUOTES to match your own vision board captions. -->
+<title>Vision Board Rotator</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link
+href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@1&family=Poppins:wght@400;500;600&display=swap"
+rel="stylesheet"
+>
 
 <style>
+
 :root{
-  --text:#fff;
+  --pink:#F7D9DF;
+  --text:#5F4650;
+  --muted:#8A6872;
+  --accent:#E28A9A;
+  --white:#FFF;
 }
-*{box-sizing:border-box;}
-html,body{width:100%;height:100%;margin:0;}
-body{min-height:100%;overflow:hidden;background:transparent;font-family:"Poppins",sans-serif;}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+
+body{
+  min-height:100%;
+  overflow:hidden;
+  background:transparent;
+  font-family:"Poppins",sans-serif;
+}
+
+/* WIDGET */
+
 .widget{
-  position:relative;width:100%;min-height:100vh;border-radius:18px;overflow:hidden;
-  box-shadow:0 8px 28px rgba(95,70,80,0.10);
+  position:relative;
+  width:100%;
+  min-height:100vh;
+  overflow:hidden;
+  border-radius:18px;
+
+  background:var(--pink);
+
+  box-shadow:
+    0 8px 28px rgba(95,70,80,.10);
 }
+
+
+/* SLIDES */
+
+.slides{
+  position:absolute;
+  inset:0;
+}
+
 .slide{
-  position:absolute;inset:0;background-size:cover;background-position:center;
-  opacity:0;transition:opacity 1.2s ease;
+  position:absolute;
+  inset:0;
+
+  opacity:0;
+
+  transition:
+    opacity 1.2s ease;
 }
-.slide.active{opacity:1;}
+
+.slide.active{
+  opacity:1;
+}
+
+.slide img{
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  display:block;
+}
+
+
+/* SOFT FILTER */
+
+.slide::after{
+  content:"";
+
+  position:absolute;
+  inset:0;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(247,217,223,.06) 0%,
+      rgba(95,70,80,.05) 45%,
+      rgba(67,42,51,.58) 100%
+    );
+}
+
+
+/* TEXT */
+
 .overlay{
-  position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.55) 100%);
-  display:flex;align-items:flex-end;justify-content:center;padding:20px;
+  position:absolute;
+  inset:0;
+
+  z-index:5;
+
+  pointer-events:none;
+
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+
+  padding:
+    20px
+    24px
+    26px;
 }
+
 .quote{
-  color:var(--text);font-family:"DM Serif Display",serif;font-style:italic;
-  font-size:clamp(1rem,5vw,1.35rem);text-align:center;margin:0;max-width:90%;
-  text-shadow:0 2px 8px rgba(0,0,0,0.35);
+  color:#fff;
+
+  font-family:
+    "DM Serif Display",
+    serif;
+
+  font-style:italic;
+
+  font-size:
+    clamp(
+      1.05rem,
+      5vw,
+      1.45rem
+    );
+
+  line-height:1.25;
+
+  text-align:center;
+
+  margin:0;
+
+  max-width:90%;
+
+  text-shadow:
+    0 2px 10px
+    rgba(0,0,0,.40);
 }
+
+
+/* EDIT BUTTON */
+
+.edit-toggle{
+  position:absolute;
+
+  z-index:20;
+
+  top:12px;
+  right:12px;
+
+  width:30px;
+  height:30px;
+
+  border:none;
+  border-radius:50%;
+
+  background:
+    rgba(255,255,255,.82);
+
+  color:var(--text);
+
+  cursor:pointer;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:.8rem;
+
+  box-shadow:
+    0 2px 8px
+    rgba(95,70,80,.12);
+}
+
+
+/* EDITOR BACKDROP */
+
+.editor-backdrop{
+  position:absolute;
+
+  z-index:50;
+
+  inset:0;
+
+  display:none;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:12px;
+
+  background:
+    rgba(95,70,80,.26);
+
+  backdrop-filter:
+    blur(5px);
+}
+
+.editor-backdrop.open{
+  display:flex;
+}
+
+
+/* EDITOR */
+
+.editor{
+  width:100%;
+  max-width:520px;
+
+  max-height:
+    calc(100vh - 24px);
+
+  overflow-y:auto;
+
+  background:
+    #FFF8FA;
+
+  border-radius:16px;
+
+  padding:18px;
+
+  color:var(--text);
+
+  box-shadow:
+    0 12px 35px
+    rgba(95,70,80,.20);
+}
+
+.editor-header{
+  display:flex;
+
+  align-items:flex-start;
+  justify-content:space-between;
+
+  gap:12px;
+
+  margin-bottom:14px;
+}
+
+.editor-title{
+  margin:0;
+
+  font-family:
+    "DM Serif Display",
+    serif;
+
+  font-size:1.35rem;
+}
+
+.editor-subtitle{
+  margin:3px 0 0;
+
+  color:var(--muted);
+
+  font-size:.68rem;
+}
+
+
+/* CLOSE */
+
+.close-btn{
+  border:none;
+
+  background:
+    #F7D9DF;
+
+  color:var(--text);
+
+  width:28px;
+  height:28px;
+
+  border-radius:50%;
+
+  cursor:pointer;
+
+  font-size:.9rem;
+}
+
+
+/* IMAGE SETTINGS */
+
+.image-setting{
+  padding:12px;
+
+  margin-bottom:10px;
+
+  background:#fff;
+
+  border:
+    1px solid #F0D1D8;
+
+  border-radius:12px;
+}
+
+.setting-number{
+  margin:
+    0 0 8px;
+
+  color:var(--muted);
+
+  font-size:.6rem;
+
+  font-weight:600;
+
+  letter-spacing:.15em;
+
+  text-transform:uppercase;
+}
+
+.preview-row{
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+
+  margin-bottom:9px;
+}
+
+.preview{
+  width:52px;
+  height:52px;
+
+  object-fit:cover;
+
+  border-radius:9px;
+
+  background:var(--pink);
+
+  flex-shrink:0;
+}
+
+.preview-help{
+  font-size:.62rem;
+
+  color:var(--muted);
+
+  line-height:1.4;
+}
+
+
+/* FIELDS */
+
+.field{
+  display:flex;
+
+  flex-direction:column;
+
+  gap:4px;
+
+  margin-top:8px;
+}
+
+.field label{
+  font-size:.58rem;
+
+  font-weight:600;
+
+  text-transform:uppercase;
+
+  letter-spacing:.1em;
+
+  color:var(--muted);
+}
+
+.field input{
+  width:100%;
+
+  padding:7px 9px;
+
+  border:
+    1px solid #E7B9C4;
+
+  border-radius:8px;
+
+  font-family:
+    "Poppins",
+    sans-serif;
+
+  font-size:.75rem;
+
+  color:var(--text);
+
+  background:#fff;
+
+  outline:none;
+}
+
+.field input:focus{
+  border-color:var(--accent);
+}
+
+
+/* BUTTONS */
+
+.editor-actions{
+  display:flex;
+
+  gap:8px;
+
+  margin-top:14px;
+}
+
+.save-btn,
+.reset-btn{
+  border:none;
+
+  padding:
+    9px 14px;
+
+  border-radius:999px;
+
+  font-family:
+    "Poppins",
+    sans-serif;
+
+  font-size:.72rem;
+
+  font-weight:600;
+
+  cursor:pointer;
+}
+
+.save-btn{
+  flex:1;
+
+  background:
+    var(--accent);
+
+  color:white;
+}
+
+.reset-btn{
+  background:
+    #F7D9DF;
+
+  color:var(--text);
+}
+
+
+/* SMALL SCREENS */
+
+@media(
+  max-width:420px
+){
+
+  .editor{
+    padding:14px;
+  }
+
+  .editor-actions{
+    flex-direction:column;
+  }
+
+}
+
 </style>
 </head>
+
+
 <body>
-<main class="widget" id="widget">
-  <div class="overlay"><p class="quote" id="quote">"..."</p></div>
+
+<main
+  class="widget"
+  id="widget"
+>
+
+  <div
+    class="slides"
+    id="slides"
+  ></div>
+
+  <div class="overlay">
+
+    <p
+      class="quote"
+      id="quote"
+    >
+      "..."
+    </p>
+
+  </div>
+
+
+  <button
+    class="edit-toggle"
+    id="editToggle"
+    title="Customize vision board"
+  >
+    ✎
+  </button>
+
+
+  <div
+    class="editor-backdrop"
+    id="editorBackdrop"
+  >
+
+    <div class="editor">
+
+      <div class="editor-header">
+
+        <div>
+
+          <h2 class="editor-title">
+            Your vision board
+          </h2>
+
+          <p class="editor-subtitle">
+            Change the images and affirmations to make it yours.
+          </p>
+
+        </div>
+
+        <button
+          class="close-btn"
+          id="closeEditor"
+        >
+          ✕
+        </button>
+
+      </div>
+
+
+      <div id="settingsContainer"></div>
+
+
+      <div class="editor-actions">
+
+        <button
+          class="reset-btn"
+          id="resetBtn"
+        >
+          Reset to defaults
+        </button>
+
+        <button
+          class="save-btn"
+          id="saveBtn"
+        >
+          Save changes
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
 </main>
 
+
 <script>
-// CUSTOMIZE: swap in your own image URLs (same length as QUOTES, or leave mismatched — it will loop)
-const IMAGES = [
-  "https://picsum.photos/id/1011/800/1000",
-  "https://picsum.photos/id/1025/800/1000",
-  "https://picsum.photos/id/1035/800/1000",
-  "https://picsum.photos/id/1043/800/1000"
+
+/*
+================================================
+DEFAULT VISION BOARD
+
+All default photos are from Pexels.
+
+Pexels allows free personal + commercial use.
+================================================
+*/
+
+
+const DEFAULT_ITEMS = [
+
+  {
+
+    image:
+    "https://images.pexels.com/photos/29765795/pexels-photo-29765795.jpeg?auto=compress&cs=tinysrgb&w=1400",
+
+    quote:
+    "Create a life that feels like you."
+
+  },
+
+
+  {
+
+    image:
+    "https://images.pexels.com/photos/10016631/pexels-photo-10016631.jpeg?auto=compress&cs=tinysrgb&w=1400",
+
+    quote:
+    "Soft life, clear vision."
+
+  },
+
+
+  {
+
+    image:
+    "https://images.pexels.com/photos/12399615/pexels-photo-12399615.jpeg?auto=compress&cs=tinysrgb&w=1400",
+
+    quote:
+    "There is so much more waiting for me."
+
+  },
+
+
+  {
+
+    image:
+    "https://images.pexels.com/photos/36881833/pexels-photo-36881833.jpeg?auto=compress&cs=tinysrgb&w=1400",
+
+    quote:
+    "Building the life I dream about."
+
+  }
+
 ];
 
-const QUOTES = [
-  "I am in my glow up era.",
-  "Soft life, hard goals.",
-  "Building the life I dream about.",
-  "Consistency over perfection."
-];
 
-const widget = document.getElementById("widget");
-const quoteEl = document.getElementById("quote");
+/*
+Different ?id= values allow independent
+vision boards if needed.
 
-IMAGES.forEach((url, i) => {
-  const slide = document.createElement("div");
-  slide.className = "slide" + (i === 0 ? " active" : "");
-  slide.style.backgroundImage = `url(${url})`;
-  slide.dataset.index = i;
-  widget.insertBefore(slide, widget.firstChild);
-});
+Example:
 
+.../vision%20board/?id=personal
+*/
+
+const INSTANCE_ID =
+  new URLSearchParams(
+    window.location.search
+  ).get("id")
+  || "default";
+
+
+const STORAGE_KEY =
+  "visionBoard_" +
+  INSTANCE_ID;
+
+
+let items = [];
+let slides = [];
 let current = 0;
-const slides = document.querySelectorAll(".slide");
-quoteEl.textContent = `"${QUOTES[0] || ""}"`;
+let timer = null;
 
-setInterval(() => {
-  slides[current].classList.remove("active");
-  current = (current + 1) % slides.length;
-  slides[current].classList.add("active");
-  quoteEl.textContent = `"${QUOTES[current % QUOTES.length] || ""}"`;
-}, 4000);
+
+const slidesContainer =
+  document.getElementById(
+    "slides"
+  );
+
+
+const quoteEl =
+  document.getElementById(
+    "quote"
+  );
+
+
+const editorBackdrop =
+  document.getElementById(
+    "editorBackdrop"
+  );
+
+
+const settingsContainer =
+  document.getElementById(
+    "settingsContainer"
+  );
+
+
+/*
+========================
+LOAD
+========================
+*/
+
+function loadItems(){
+
+  try{
+
+    const stored =
+      JSON.parse(
+        localStorage.getItem(
+          STORAGE_KEY
+        )
+      );
+
+
+    if(
+      Array.isArray(stored)
+      &&
+      stored.length
+    ){
+
+      return stored;
+
+    }
+
+  }
+
+  catch(error){}
+
+
+  return structuredClone(
+    DEFAULT_ITEMS
+  );
+
+}
+
+
+/*
+========================
+SAVE
+========================
+*/
+
+function saveItems(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(items)
+  );
+
+}
+
+
+/*
+========================
+RENDER SLIDES
+========================
+*/
+
+function renderSlides(){
+
+  slidesContainer.innerHTML =
+    "";
+
+
+  items.forEach(
+    (item,index) => {
+
+      const slide =
+        document.createElement(
+          "div"
+        );
+
+
+      slide.className =
+        "slide"
+        +
+        (
+          index === 0
+          ? " active"
+          : ""
+        );
+
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+
+      image.src =
+        item.image;
+
+
+      image.alt =
+        "Vision board image";
+
+
+      image.onerror = () => {
+
+        image.style.display =
+          "none";
+
+        slide.style.background =
+          "#F7D9DF";
+
+      };
+
+
+      slide.appendChild(
+        image
+      );
+
+
+      slidesContainer.appendChild(
+        slide
+      );
+
+    }
+  );
+
+
+  slides =
+    document.querySelectorAll(
+      ".slide"
+    );
+
+
+  current = 0;
+
+
+  updateQuote();
+
+}
+
+
+/*
+========================
+QUOTE
+========================
+*/
+
+function updateQuote(){
+
+  const quote =
+    items[current]?.quote
+    || "";
+
+
+  quoteEl.textContent =
+    quote
+    ? `"${quote}"`
+    : "";
+
+}
+
+
+/*
+========================
+ROTATION
+========================
+*/
+
+function nextSlide(){
+
+  if(
+    slides.length <= 1
+  ){
+    return;
+  }
+
+
+  slides[current]
+    .classList
+    .remove("active");
+
+
+  current =
+    (
+      current + 1
+    )
+    %
+    slides.length;
+
+
+  slides[current]
+    .classList
+    .add("active");
+
+
+  updateQuote();
+
+}
+
+
+function startRotation(){
+
+  stopRotation();
+
+
+  timer =
+    setInterval(
+      nextSlide,
+      5000
+    );
+
+}
+
+
+function stopRotation(){
+
+  if(timer){
+
+    clearInterval(timer);
+
+    timer = null;
+
+  }
+
+}
+
+
+/*
+========================
+EDITOR
+========================
+*/
+
+function buildEditor(){
+
+  settingsContainer.innerHTML =
+    "";
+
+
+  items.forEach(
+    (item,index) => {
+
+
+      const section =
+        document.createElement(
+          "div"
+        );
+
+
+      section.className =
+        "image-setting";
+
+
+      section.innerHTML = `
+
+        <p class="setting-number">
+          Vision ${index + 1}
+        </p>
+
+
+        <div class="preview-row">
+
+          <img
+            class="preview"
+            id="preview-${index}"
+            src="${escapeHTML(item.image)}"
+            alt=""
+          >
+
+          <div class="preview-help">
+
+            Paste the URL of any image
+            you have permission to use.
+
+          </div>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Image URL
+          </label>
+
+          <input
+            type="url"
+            class="image-input"
+            data-index="${index}"
+            value="${escapeHTML(item.image)}"
+            placeholder="https://..."
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Affirmation
+          </label>
+
+          <input
+            type="text"
+            class="quote-input"
+            data-index="${index}"
+            value="${escapeHTML(item.quote)}"
+          >
+
+        </div>
+
+      `;
+
+
+      settingsContainer.appendChild(
+        section
+      );
+
+    }
+  );
+
+
+  document
+    .querySelectorAll(
+      ".image-input"
+    )
+    .forEach(
+      input => {
+
+        input.addEventListener(
+          "input",
+          event => {
+
+            const index =
+              event.target
+              .dataset
+              .index;
+
+
+            document
+              .getElementById(
+                `preview-${index}`
+              )
+              .src =
+                event.target.value;
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/*
+========================
+OPEN EDITOR
+========================
+*/
+
+document
+.getElementById(
+  "editToggle"
+)
+.addEventListener(
+  "click",
+  () => {
+
+    stopRotation();
+
+    buildEditor();
+
+    editorBackdrop
+      .classList
+      .add("open");
+
+  }
+);
+
+
+/*
+========================
+CLOSE EDITOR
+========================
+*/
+
+function closeEditor(){
+
+  editorBackdrop
+    .classList
+    .remove("open");
+
+  startRotation();
+
+}
+
+
+document
+.getElementById(
+  "closeEditor"
+)
+.addEventListener(
+  "click",
+  closeEditor
+);
+
+
+/*
+Close if background clicked
+*/
+
+editorBackdrop
+.addEventListener(
+  "click",
+  event => {
+
+    if(
+      event.target
+      ===
+      editorBackdrop
+    ){
+
+      closeEditor();
+
+    }
+
+  }
+);
+
+
+/*
+========================
+SAVE CHANGES
+========================
+*/
+
+document
+.getElementById(
+  "saveBtn"
+)
+.addEventListener(
+  "click",
+  () => {
+
+
+    const imageInputs =
+      document
+      .querySelectorAll(
+        ".image-input"
+      );
+
+
+    const quoteInputs =
+      document
+      .querySelectorAll(
+        ".quote-input"
+      );
+
+
+    items =
+      Array.from(
+        imageInputs
+      )
+      .map(
+        (input,index) => {
+
+          const image =
+            input.value
+            .trim();
+
+
+          const quote =
+            quoteInputs[index]
+            .value
+            .trim();
+
+
+          return {
+
+            image:
+              image
+              ||
+              DEFAULT_ITEMS[index]
+              .image,
+
+            quote
+
+          };
+
+        }
+      );
+
+
+    saveItems();
+
+    renderSlides();
+
+    closeEditor();
+
+  }
+);
+
+
+/*
+========================
+RESET
+========================
+*/
+
+document
+.getElementById(
+  "resetBtn"
+)
+.addEventListener(
+  "click",
+  () => {
+
+
+    localStorage.removeItem(
+      STORAGE_KEY
+    );
+
+
+    items =
+      structuredClone(
+        DEFAULT_ITEMS
+      );
+
+
+    renderSlides();
+
+    buildEditor();
+
+  }
+);
+
+
+/*
+========================
+HELPER
+========================
+*/
+
+function escapeHTML(value){
+
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    );
+
+}
+
+
+/*
+========================
+INITIALIZE
+========================
+*/
+
+items =
+  loadItems();
+
+
+renderSlides();
+
+startRotation();
+
 </script>
+
 </body>
 </html>
