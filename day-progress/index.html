@@ -4,39 +4,631 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Day Progress</title>
+
 <style>
-:root{--bg:#f7f7f5;--card:#fff;--text:#20201f;--muted:#777773;--line:#e7e7e3;--soft:#efefec;--accent:#20201f}
-*{box-sizing:border-box}html,body{width:100%;height:100%;margin:0}
-body{background:transparent;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
-.widget{width:100%;min-height:100vh;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:14px;overflow:hidden}
-.center{text-align:center;align-items:center}.kicker{margin:0;color:var(--muted);font-size:.65rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-.big{margin:0;font-size:clamp(2rem,10vw,4rem);line-height:1;font-weight:650;letter-spacing:-.04em}.sub{margin:0;color:var(--muted);font-size:.78rem;line-height:1.5}
-.track{width:100%;height:9px;background:var(--soft);border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .35s ease}
-.primary{border:none;background:var(--accent);color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer;font:inherit;font-weight:600}.primary:disabled{opacity:.55;cursor:default}
-.card{width:120px;height:120px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;transition:transform 4s ease}.value{font-weight:650}
-@media(prefers-color-scheme:dark){:root{--bg:#191919;--card:#222;--text:#f3f3f2;--muted:#9b9b97;--line:#343432;--soft:#2d2d2a;--accent:#f3f3f2}.primary{color:#191919}}
+:root{
+  --bg:#f7f7f5;
+  --card:#ffffff;
+  --text:#20201f;
+  --muted:#777773;
+  --line:#e7e7e3;
+  --soft:#efefec;
+  --accent:#20201f;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  width:100%;
+  height:100%;
+  margin:0;
+}
+
+body{
+  background:transparent;
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--text);
+}
+
+.widget{
+  width:100%;
+  min-height:100vh;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--bg);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+
+.kicker{
+  margin:0 0 5px;
+  color:var(--muted);
+  font-size:.65rem;
+  font-weight:700;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+
+.title{
+  margin:0;
+  font-size:1.35rem;
+  line-height:1.15;
+  font-weight:650;
+  letter-spacing:-.025em;
+}
+
+.percentage{
+  margin:0;
+  font-size:2rem;
+  line-height:1;
+  font-weight:650;
+  letter-spacing:-.04em;
+  font-variant-numeric:tabular-nums;
+}
+
+.track{
+  width:100%;
+  height:9px;
+  background:var(--soft);
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.fill{
+  height:100%;
+  width:0;
+  background:var(--accent);
+  border-radius:999px;
+  transition:width .3s ease;
+}
+
+.sub{
+  margin:7px 0 0;
+  color:var(--muted);
+  font-size:.74rem;
+}
+
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.task{
+  display:grid;
+  grid-template-columns:22px 1fr 28px;
+  align-items:center;
+  gap:10px;
+  padding:10px 11px;
+  border:1px solid var(--line);
+  background:var(--card);
+  border-radius:11px;
+}
+
+.task.done .text{
+  color:var(--muted);
+  text-decoration:line-through;
+}
+
+.check{
+  appearance:none;
+  -webkit-appearance:none;
+  width:18px;
+  height:18px;
+  margin:0;
+  border:1.5px solid var(--muted);
+  border-radius:5px;
+  cursor:pointer;
+  position:relative;
+  transition:.15s ease;
+}
+
+.check:checked{
+  background:var(--accent);
+  border-color:var(--accent);
+}
+
+.check:checked::after{
+  content:"";
+  position:absolute;
+  left:5px;
+  top:2px;
+  width:4px;
+  height:8px;
+  border:solid var(--bg);
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+}
+
+.text{
+  font-size:.82rem;
+  line-height:1.35;
+  word-break:break-word;
+}
+
+.delete{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  cursor:pointer;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  font-size:1rem;
+}
+
+.delete:hover{
+  background:var(--soft);
+  color:var(--text);
+}
+
+.form{
+  margin-top:auto;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+}
+
+.input{
+  width:100%;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--card);
+  color:var(--text);
+  padding:9px 11px;
+  outline:none;
+  font:inherit;
+  font-size:.8rem;
+}
+
+.input:focus{
+  border-color:var(--muted);
+}
+
+.add{
+  border:0;
+  background:var(--accent);
+  color:#fff;
+  border-radius:10px;
+  padding:9px 13px;
+  cursor:pointer;
+  font:inherit;
+  font-size:.78rem;
+  font-weight:650;
+}
+
+.footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.clear{
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  padding:0;
+  cursor:pointer;
+  font:inherit;
+  font-size:.7rem;
+}
+
+.date{
+  color:var(--muted);
+  font-size:.7rem;
+}
+
+.empty{
+  padding:14px;
+  border:1px dashed var(--line);
+  border-radius:11px;
+  color:var(--muted);
+  text-align:center;
+  font-size:.76rem;
+}
+
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#191919;
+    --card:#222222;
+    --text:#f3f3f2;
+    --muted:#9b9b97;
+    --line:#343432;
+    --soft:#2d2d2a;
+    --accent:#f3f3f2;
+  }
+
+  .add{
+    color:#191919;
+  }
+
+  .check:checked::after{
+    border-color:#191919;
+  }
+}
 </style>
 </head>
+
 <body>
-<main class="widget center">
-<p class="kicker">DAY PROGRESS</p>
-<p class="big" id="pct">0%</p>
-<div class="track"><div class="fill" id="fill"></div></div>
-<p class="sub" id="label"></p>
+
+<main class="widget">
+
+  <div class="header">
+    <div>
+      <p class="kicker">TODAY</p>
+      <h1 class="title">Task progress</h1>
+    </div>
+
+    <p class="percentage" id="percentage">0%</p>
+  </div>
+
+  <div>
+    <div class="track">
+      <div class="fill" id="fill"></div>
+    </div>
+
+    <p class="sub" id="progressText">
+      0 of 0 completed
+    </p>
+  </div>
+
+  <div class="list" id="taskList"></div>
+
+  <form class="form" id="taskForm">
+    <input
+      class="input"
+      id="taskInput"
+      type="text"
+      maxlength="100"
+      placeholder="Add a task..."
+      autocomplete="off"
+    >
+
+    <button class="add" type="submit">
+      Add
+    </button>
+  </form>
+
+  <div class="footer">
+
+    <button
+      class="clear"
+      id="clearCompleted"
+      type="button"
+    >
+      Clear completed
+    </button>
+
+    <span class="date" id="date"></span>
+
+  </div>
+
 </main>
+
 <script>
-function draw(){
-  const now=new Date();
-  const start=new Date(now); start.setHours(0,0,0,0);
-  const end=new Date(now); end.setHours(24,0,0,0);
-  const progress=((now-start)/(end-start))*100;
-  document.getElementById('pct').textContent=Math.floor(progress)+'%';
-  document.getElementById('fill').style.width=progress+'%';
-  document.getElementById('label').textContent=now.toLocaleDateString([],{
-    weekday:'long',month:'short',day:'numeric'
-  });
+const STORAGE_KEY = "minimalDayTaskProgress";
+
+const taskList =
+  document.getElementById("taskList");
+
+const taskForm =
+  document.getElementById("taskForm");
+
+const taskInput =
+  document.getElementById("taskInput");
+
+const percentage =
+  document.getElementById("percentage");
+
+const fill =
+  document.getElementById("fill");
+
+const progressText =
+  document.getElementById("progressText");
+
+const clearCompleted =
+  document.getElementById("clearCompleted");
+
+const date =
+  document.getElementById("date");
+
+
+function createId(){
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).slice(2)
+  );
 }
-draw(); setInterval(draw,60000);
+
+
+function loadTasks(){
+
+  try{
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+      );
+
+    if(Array.isArray(saved)){
+      return saved;
+    }
+
+  }catch(error){}
+
+  return [
+    {
+      id:createId(),
+      text:"Review inbox",
+      done:true
+    },
+    {
+      id:createId(),
+      text:"Finish priority task",
+      done:false
+    },
+    {
+      id:createId(),
+      text:"Process notes",
+      done:false
+    }
+  ];
+}
+
+
+let tasks = loadTasks();
+
+
+function saveTasks(){
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(tasks)
+  );
+
+}
+
+
+function updateProgress(){
+
+  const total =
+    tasks.length;
+
+  const completed =
+    tasks.filter(
+      task => task.done
+    ).length;
+
+  const progress =
+    total
+      ? Math.round(
+          (completed / total) * 100
+        )
+      : 0;
+
+  percentage.textContent =
+    progress + "%";
+
+  fill.style.width =
+    progress + "%";
+
+  progressText.textContent =
+    completed +
+    " of " +
+    total +
+    " completed";
+
+}
+
+
+function renderTasks(){
+
+  taskList.innerHTML = "";
+
+
+  if(tasks.length === 0){
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "empty";
+
+    empty.textContent =
+      "Add your first task for today.";
+
+    taskList.appendChild(empty);
+
+  }
+
+
+  tasks.forEach(task => {
+
+    const row =
+      document.createElement("div");
+
+    row.className =
+      "task" +
+      (task.done ? " done" : "");
+
+
+    const checkbox =
+      document.createElement("input");
+
+    checkbox.type =
+      "checkbox";
+
+    checkbox.className =
+      "check";
+
+    checkbox.checked =
+      task.done;
+
+
+    checkbox.addEventListener(
+      "change",
+      () => {
+
+        task.done =
+          checkbox.checked;
+
+        saveTasks();
+
+        renderTasks();
+
+      }
+    );
+
+
+    const text =
+      document.createElement("div");
+
+    text.className =
+      "text";
+
+    text.textContent =
+      task.text;
+
+
+    const remove =
+      document.createElement("button");
+
+    remove.type =
+      "button";
+
+    remove.className =
+      "delete";
+
+    remove.textContent =
+      "×";
+
+    remove.setAttribute(
+      "aria-label",
+      "Delete task"
+    );
+
+
+    remove.addEventListener(
+      "click",
+      () => {
+
+        tasks =
+          tasks.filter(
+            item =>
+              item.id !== task.id
+          );
+
+        saveTasks();
+
+        renderTasks();
+
+      }
+    );
+
+
+    row.appendChild(
+      checkbox
+    );
+
+    row.appendChild(
+      text
+    );
+
+    row.appendChild(
+      remove
+    );
+
+    taskList.appendChild(
+      row
+    );
+
+  });
+
+
+  updateProgress();
+
+}
+
+
+taskForm.addEventListener(
+  "submit",
+  event => {
+
+    event.preventDefault();
+
+    const text =
+      taskInput.value.trim();
+
+    if(!text){
+      return;
+    }
+
+
+    tasks.push({
+
+      id:createId(),
+
+      text:text,
+
+      done:false
+
+    });
+
+
+    taskInput.value =
+      "";
+
+    saveTasks();
+
+    renderTasks();
+
+  }
+);
+
+
+clearCompleted.addEventListener(
+  "click",
+  () => {
+
+    tasks =
+      tasks.filter(
+        task => !task.done
+      );
+
+    saveTasks();
+
+    renderTasks();
+
+  }
+);
+
+
+date.textContent =
+  new Date()
+    .toLocaleDateString(
+      [],
+      {
+        month:"short",
+        day:"numeric"
+      }
+    );
+
+
+renderTasks();
 </script>
+
 </body>
 </html>
